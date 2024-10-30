@@ -2,13 +2,14 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Meine Retro-Webseite</title>
+    <title>Live Environment Test-Area</title>
     <style>
         body {
             background-color: #F0E68C;
             font-family: "Courier New", Courier, monospace;
             color: #000;
             margin: 0;
+            transition: filter 0.3s ease;
         }
         header {
             background-color: #8B4513;
@@ -59,6 +60,35 @@
         .button:hover {
             background-color: #D2B48C;
         }
+
+        /* Modal Styles */
+        .modal {
+            display: none; /* Verstecke das Modal standardmäßig */
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8); /* Schwarzer Hintergrund mit Transparenz */
+        }
+        .modal-content {
+            margin: 5% auto;
+            display: block;
+            max-width: 80%;
+            max-height: 80%;
+        }
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #ffffff;
+            font-size: 40px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -66,19 +96,51 @@
         <h1>Willkommen auf meiner Retro-Webseite</h1>
     </header>
     <nav>
-        <a href="#home">Startseite</a>
-        <a href="#about">Über uns</a>
-        <a href="#contact">Kontakt</a>
+        <a href="./result.png" download>Result Bild Downloaden</a>
+        <a href="./history.json" download>Json Historie Downloaden</a>
+        <a href="./history.csv" download>CSV Historie Downloaden</a>
     </nav>
     <main>
         <h2>Über die Seite</h2>
         <p>
-            Diese Webseite ist im klassischen Retro-Stil gestaltet, um das Aussehen früherer Webseiten zu imitieren. Verwende einfache Layouts, Basic-Farben und monospaced Schriftarten, um den gewünschten Effekt zu erzielen.
+            Diese Seite ist nur zum Testen der Funktionen und des kurzfristigen
+            Environments.
         </p>
-        <button class="button">Mehr erfahren</button>
+        <button class="button" id="showImageButton">Bild anzeigen</button>
+
+        <!-- Das Modal -->
+        <div id="imageModal" class="modal">
+            <span class="close" id="closeModal">&times;</span>
+            <img class="modal-content" id="modalImage" src="./result.png" alt="Result Bild">
+        </div>
     </main>
     <footer>
-        &copy; 2023 Retro-Webseite. Alle Rechte vorbehalten.
+        &copy; 2024 Retro-Webseite. Alle Rechte vorbehalten.
     </footer>
+
+    <script>
+        // JavaScript für das Anzeigen des Bildes und Blurring des Hintergrunds
+        var modal = document.getElementById("imageModal");
+        var btn = document.getElementById("showImageButton");
+        var span = document.getElementById("closeModal");
+
+        btn.onclick = function(){
+            modal.style.display = "block";
+            document.body.style.filter = "blur(5px)";
+        }
+
+        span.onclick = function() {
+            modal.style.display = "none";
+            document.body.style.filter = "none";
+        }
+
+        // Schließen des Modals, wenn außerhalb geklickt wird
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+                document.body.style.filter = "none";
+            }
+        }
+    </script>
 </body>
 </html>
