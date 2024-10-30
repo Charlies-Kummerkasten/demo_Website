@@ -9,7 +9,6 @@
             font-family: "Courier New", Courier, monospace;
             color: #000;
             margin: 0;
-            transition: filter 0.3s ease;
         }
         header {
             background-color: #8B4513;
@@ -60,36 +59,9 @@
         .button:hover {
             background-color: #D2B48C;
         }
-
-        /* Modal Styles */
-        .modal {
-            display: none; /* Verstecke das Modal standardmäßig */
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.8); /* Schwarzer Hintergrund mit Transparenz */
-        }
-        .modal-content {
-            margin: 5% auto;
-            display: block;
-            max-width: 80%;
-            max-height: 80%;
-        }
-        .close {
-            position: absolute;
-            top: 20px;
-            right: 35px;
-            color: #ffffff;
-            font-size: 40px;
-            font-weight: bold;
-            text-decoration: none;
-            cursor: pointer;
-        }
     </style>
+    <!-- Einbinden von Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <header>
@@ -106,40 +78,94 @@
             Diese Seite ist nur zum Testen der Funktionen und des kurzfristigen
             Environments.
         </p>
-        <button class="button" id="showImageButton">Bild anzeigen</button>
-
-        <!-- Das Modal -->
-        <div id="imageModal" class="modal">
-            <span class="close" id="closeModal">&times;</span>
-            <img class="modal-content" id="modalImage" src="./result.png" alt="Result Bild">
-        </div>
+        <!-- Platzhalter für das Diagramm -->
+        <canvas id="myChart" width="400" height="200"></canvas>
     </main>
     <footer>
         &copy; 2024 Retro-Webseite. Alle Rechte vorbehalten.
     </footer>
 
     <script>
-        // JavaScript für das Anzeigen des Bildes und Blurring des Hintergrunds
-        var modal = document.getElementById("imageModal");
-        var btn = document.getElementById("showImageButton");
-        var span = document.getElementById("closeModal");
-
-        btn.onclick = function(){
-            modal.style.display = "block";
-            document.body.style.filter = "blur(5px)";
-        }
-
-        span.onclick = function() {
-            modal.style.display = "none";
-            document.body.style.filter = "none";
-        }
-
-        // Schließen des Modals, wenn außerhalb geklickt wird
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-                document.body.style.filter = "none";
+        // Laden und Verarbeiten der CSV-Datei
+        fetch('./history.csv')
+        .then(response => response.text())
+        .then(data => {
+            // CSV-Daten parsen
+            var parsedData = parseCSV(data);
+            if(parsedData.length < 2) {
+                console.error('CSV-Daten sind leer oder fehlerhaft.');
+                return;
             }
+            // Header-Zeile und Index der 'new_Money' Spalte ermitteln
+            var headers = parsedData[0];
+            var headerIndex = headers.indexOf('new_Money');
+            if(headerIndex === -1) {
+                console.error('Spalte "new_Money" nicht in der CSV-Datei gefunden.');
+                return;
+            }
+
+            // Daten extrahieren
+            var labels = [];
+            var newMoneyData = [];
+            for(var i = 1; i < parsedData.length; i++) {
+                var row = parsedData[i];
+                if(row.length > headerIndex) {
+                    labels.push(i); // Alternativ kannst du hier Zeitstempel verwenden, falls vorhanden
+                    newMoneyData.push(parseFloat(row[headerIndex]));
+                }
+            }
+
+            // Diagramm erstellen
+            var ctx = document.getElementById('myChart').getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'new_Money',
+                        data: newMoneyData,
+                        backgroundColor: 'rgba(222, 184, 135, 0.2)',
+                        borderColor: 'rgba(139, 69, 19, 1)',
+                        borderWidth: 2,
+                        fill: false,
+                        tension: 0.1,
+                        pointRadius: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Index'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'new_Money'
+                            }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Fehler beim Laden oder Verarbeiten von history.csv:', error);
+        });
+
+        // Einfache CSV-Parser-Funktion
+        function parseCSV(data) {
+            var lines = data.trim().split('\n');
+            var result = [];
+            lines.forEach(function(line) {
+                var values = line.split(',');
+                result.push(values);
+            });
+            return result;
         }
     </script>
 </body>
