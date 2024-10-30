@@ -1,174 +1,81 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <title>Live Environment Test-Area</title>
-    <style>
-        body {
-            background-color: #F0E68C;
-            font-family: "Courier New", Courier, monospace;
-            color: #000;
-            margin: 0;
-        }
-        header {
-            background-color: #8B4513;
-            color: #FFFFFF;
-            padding: 20px;
-            text-align: center;
-        }
-        nav {
-            background-color: #DEB887;
-            padding: 10px;
-            text-align: center;
-        }
-        nav a {
-            color: #000000;
-            margin: 0 15px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        main {
-            padding: 20px;
-        }
-        h1, h2 {
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        footer {
-            background-color: #8B4513;
-            color: #FFFFFF;
-            padding: 10px;
-            text-align: center;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-        /* Canvas Styling */
-        #chartContainer {
-            width: 80%;
-            margin: 0 auto;
-        }
-    </style>
-    <!-- Einbinden von Chart.js und Papa Parse -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
-</head>
-<body>
-    <header>
-        <h1>Willkommen auf meiner Retro-Webseite</h1>
-    </header>
-    <nav>
-        <a href="./result.png" download>Result Bild Downloaden</a>
-        <a href="./history.json" download>Json Historie Downloaden</a>
-        <a href="./history.csv" download>CSV Historie Downloaden</a>
-    </nav>
-    <main>
-        <h2>Über die Seite</h2>
-        <p>
-            Diese Seite ist nur zum Testen der Funktionen und des kurzfristigen
-            Environments.
-        </p>
+Papa.parse('./history.csv', {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: function(results) {
+        var data = results.data;
 
-        <!-- Bereich für den Graphen -->
-        <div id="chartContainer">
-            <canvas id="myChart"></canvas>
-        </div>
-    </main>
-    <footer>
-        &copy; 2024 Retro-Webseite. Alle Rechte vorbehalten.
-    </footer>
+        // Debugging: Ausgabe der geparsten Daten und des erkannten Trennzeichens
+        console.log('Erkanntes Trennzeichen:', results.meta.delimiter);
+        console.log('Geparste Daten:', data);
 
-    <script>
-        // Laden und Verarbeiten der CSV-Datei mit Papa Parse
-        Papa.parse('./history.csv', {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            delimiter: "\t", // Tabulator als Trennzeichen
-            complete: function(results) {
-                var data = results.data;
-
-                // Debugging: Ausgabe der geparsten Daten
-                console.log('Geparste Daten:', data);
-
-                // Trimmen der Spaltennamen
-                var firstRow = data[0];
-                var trimmedKeys = {};
-                for (var key in firstRow) {
-                    if (firstRow.hasOwnProperty(key)) {
-                        var trimmedKey = key.trim();
-                        trimmedKeys[trimmedKey] = firstRow[key];
-                    }
+        // Spaltennamen trimmen
+        data = data.map(row => {
+            let newRow = {};
+            for (let key in row) {
+                if (row.hasOwnProperty(key)) {
+                    let trimmedKey = key.trim();
+                    newRow[trimmedKey] = row[key];
                 }
-                data[0] = trimmedKeys;
+            }
+            return newRow;
+        });
 
-                // Prüfen, ob die Spalte 'new_Money' existiert
-                if (!data[0].hasOwnProperty('new_Money')) {
-                    console.error('Spalte "new_Money" nicht in der CSV-Datei gefunden.');
-                    console.log('Verfügbare Spalten:', Object.keys(data[0]));
-                    return;
-                }
+        // Prüfen, ob die Spalte 'new_Money' existiert
+        if (!data[0].hasOwnProperty('new_Money')) {
+            console.error('Spalte "new_Money" nicht in der CSV-Datei gefunden.');
+            console.log('Verfügbare Spalten:', Object.keys(data[0]));
+            return;
+        }
 
-                var labels = [];
-                var newMoneyData = [];
+        var labels = [];
+        var newMoneyData = [];
 
-                data.forEach((row, index) => {
-                    // Trimmen der Spaltennamen für jede Zeile
-                    var trimmedRow = {};
-                    for (var key in row) {
-                        if (row.hasOwnProperty(key)) {
-                            var trimmedKey = key.trim();
-                            trimmedRow[trimmedKey] = row[key];
-                        }
-                    }
+        data.forEach((row, index) => {
+            labels.push(index + 1); // Alternativ kannst du hier einen Zeitstempel verwenden
+            var value = parseFloat(row['new_Money']);
+            newMoneyData.push(value);
+        });
 
-                    labels.push(index + 1); // Alternativ kannst du hier einen Zeitstempel verwenden
-                    var value = parseFloat(trimmedRow['new_Money']);
-                    newMoneyData.push(value);
-                });
-
-                // Diagramm erstellen
-                var ctx = document.getElementById('myChart').getContext('2d');
-                var myChart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'new_Money',
-                            data: newMoneyData,
-                            backgroundColor: 'rgba(222, 184, 135, 0.2)',
-                            borderColor: 'rgba(139, 69, 19, 1)',
-                            borderWidth: 2,
-                            fill: false,
-                            tension: 0.1,
-                            pointRadius: 3
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        scales: {
-                            x: {
-                                display: true,
-                                title: {
-                                    display: true,
-                                    text: 'Index'
-                                }
-                            },
-                            y: {
-                                display: true,
-                                title: {
-                                    display: true,
-                                    text: 'new_Money'
-                                }
-                            }
-                        }
-                    }
-                });
+        // Diagramm erstellen
+        var ctx = document.getElementById('myChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'new_Money',
+                    data: newMoneyData,
+                    backgroundColor: 'rgba(222, 184, 135, 0.2)',
+                    borderColor: 'rgba(139, 69, 19, 1)',
+                    borderWidth: 2,
+                    fill: false,
+                    tension: 0.1,
+                    pointRadius: 3
+                }]
             },
-            error: function(err, file, inputElem, reason) {
-                console.error('Fehler beim Laden oder Verarbeiten von history.csv:', err);
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'Index'
+                        }
+                    },
+                    y: {
+                        display: true,
+                        title: {
+                            display: true,
+                            text: 'new_Money'
+                        }
+                    }
+                }
             }
         });
-    </script>
-</body>
-</html>
+    },
+    error: function(err, file, inputElem, reason) {
+        console.error('Fehler beim Laden oder Verarbeiten von history.csv:', err);
+    }
+});
