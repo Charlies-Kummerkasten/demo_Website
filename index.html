@@ -79,14 +79,28 @@
     </footer>
 
     <script>
-        // Funktion zum Laden und Parsen der CSV-Datei mit Papa Parse
+        // Laden und Verarbeiten der CSV-Datei mit Papa Parse
         Papa.parse('./history.csv', {
             download: true,
             header: true,
-            delimiter: "\t", // Tabulator als Trennzeichen
             skipEmptyLines: true,
+            delimiter: "\t", // Tabulator als Trennzeichen
             complete: function(results) {
                 var data = results.data;
+
+                // Debugging: Ausgabe der geparsten Daten
+                console.log('Geparste Daten:', data);
+
+                // Trimmen der Spaltennamen
+                var firstRow = data[0];
+                var trimmedKeys = {};
+                for (var key in firstRow) {
+                    if (firstRow.hasOwnProperty(key)) {
+                        var trimmedKey = key.trim();
+                        trimmedKeys[trimmedKey] = firstRow[key];
+                    }
+                }
+                data[0] = trimmedKeys;
 
                 // Prüfen, ob die Spalte 'new_Money' existiert
                 if (!data[0].hasOwnProperty('new_Money')) {
@@ -99,14 +113,18 @@
                 var newMoneyData = [];
 
                 data.forEach((row, index) => {
-                    // Falls ein Datum oder ein anderer Wert als Label genutzt werden soll, entsprechende Spalte verwenden
-                    labels.push(index + 1); // oder row['Datum'] falls vorhanden
-                    var value = parseFloat(row['new_Money']);
-                    if (!isNaN(value)) {
-                        newMoneyData.push(value);
-                    } else {
-                        newMoneyData.push(0); // Oder den Wert überspringen
+                    // Trimmen der Spaltennamen für jede Zeile
+                    var trimmedRow = {};
+                    for (var key in row) {
+                        if (row.hasOwnProperty(key)) {
+                            var trimmedKey = key.trim();
+                            trimmedRow[trimmedKey] = row[key];
+                        }
                     }
+
+                    labels.push(index + 1); // Alternativ kannst du hier einen Zeitstempel verwenden
+                    var value = parseFloat(trimmedRow['new_Money']);
+                    newMoneyData.push(value);
                 });
 
                 // Diagramm erstellen
