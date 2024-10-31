@@ -1,192 +1,76 @@
 <!DOCTYPE html>
-<html lang="de">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Live Environment Test-Area</title>
-    <style>
-        body {
-            background-color: #F0E68C;
-            font-family: "Courier New", Courier, monospace;
-            color: #000;
-            margin: 0;
-        }
-        header {
-            background-color: #8B4513;
-            color: #FFFFFF;
-            padding: 20px;
-            text-align: center;
-        }
-        nav {
-            background-color: #DEB887;
-            padding: 10px;
-            text-align: center;
-        }
-        nav a {
-            color: #000000;
-            margin: 0 15px;
-            text-decoration: none;
-            font-weight: bold;
-        }
-        main {
-            padding: 20px;
-        }
-        h1, h2 {
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        footer {
-            background-color: #8B4513;
-            color: #FFFFFF;
-            padding: 10px;
-            text-align: center;
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-        }
-        /* Canvas Styling */
-        #chartContainer {
-            width: 80%;
-            margin: 20px auto;
-        }
-        #myChart {
-            max-width: 100%;
-            height: 400px;
-        }
-    </style>
-    <!-- Einbinden von Chart.js und Papa Parse -->
+    <title>Der Neue Algorithmus ist da</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
 </head>
 <body>
     <header>
-        <h1>Der Neue Algorithmus ist da </h1>
+        <h1>Der Neue Algorithmus ist da</h1>
     </header>
     <nav>
-        <a href="./result.png" download>Result Bild Downloaden</a>
-        <a href="./history.json" download>Json Historie Downloaden</a>
-        <a href="./history.csv" download>CSV Historie Downloaden</a>
+        <a href="history.csv" download>Download CSV</a>
+        <a href="history.json" download>Download JSON</a>
+        <a href="history.png" download>Download PNG</a>
     </nav>
     <main>
-        <h2Versionscode: 0.1</h2>
-        <p>
-            Diese Seite ist in einem Experimentellen Stadium
-        </p>
-
-        <!-- Bereich für den Graphen -->
+        <p>Version: 1.0.0</p>
+        <p>Diese Seite befindet sich noch in der experimentellen Phase.</p>
         <div id="chartContainer">
             <canvas id="myChart"></canvas>
         </div>
-            <div id="chartContainer">
-  <canvas id="myChart"></canvas>
-</div>
-<!-- New div for displaying the text -->
-<div id="infoText"></div>
+        <!-- New div for displaying the text -->
+        <div id="infoText"></div>
     </main>
     <footer>
-        &copy; 2024 Alle Rechte vorbehalten.
+        <p>&copy; 2024</p>
     </footer>
-
-    <!-- Dein Skript am Ende des Body-Tags -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Laden und Verarbeiten der CSV-Datei mit Papa Parse
-            Papa.parse('./history.csv', {
+            Papa.parse('history.csv', {
                 download: true,
                 header: true,
-                skipEmptyLines: true,
+                dynamicTyping: true,
                 complete: function(results) {
-                    var data = results.data;
-
-                    // Debugging: Ausgabe der geparsten Daten und des erkannten Trennzeichens
-                    console.log('Erkanntes Trennzeichen:', results.meta.delimiter);
-                    console.log('Geparste Daten:', data);
-
-                    // Spaltennamen trimmen und prüfen
-                    data = data.map(row => {
-                        let newRow = {};
-                        for (let key in row) {
-                            if (row.hasOwnProperty(key)) {
-                                let trimmedKey = key.trim();
-                                newRow[trimmedKey] = row[key];
-                            }
-                        }
-                        return newRow;
-                    });
-
-                    // Prüfen, ob die Spalte 'new_Money' existiert
-                    if (!data[0].hasOwnProperty('new_Money')) {
-                        console.error('Spalte "new_Money" nicht in der CSV-Datei gefunden.');
-                        console.log('Verfügbare Spalten:', Object.keys(data[0]));
-                        return;
-                    }
-
                     var labels = [];
-                    var newMoneyData = [];
-
-                    data.forEach((row, index) => {
-                        labels.push(index + 1); // Alternativ kannst du hier einen Zeitstempel verwenden
-                        var value = parseFloat(row['new_Money']);
-                        newMoneyData.push(value);
-                    });
-
-                    // Überprüfen, ob das Canvas-Element vorhanden ist
-                    var canvasElement = document.getElementById('myChart');
-                    console.log('Canvas Element:', canvasElement);
-                    if (!canvasElement) {
-                        console.error('Canvas-Element mit ID "myChart" nicht gefunden.');
-                        return;
+                    var data = [];
+                    if (results.meta.fields.includes('new_Money')) {
+                        results.data.forEach(function(row, index) {
+                            labels.push(index);
+                            data.push(row['new_Money']);
+                        });
                     }
-
-                    // Diagramm erstellen
-                    var ctx = canvasElement.getContext('2d');
-                    var myChart = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'new_Money',
-                                data: newMoneyData,
-                                backgroundColor: 'rgba(222, 184, 135, 0.2)',
-                                borderColor: 'rgba(139, 69, 19, 1)',
-                                borderWidth: 2,
-                                fill: false,
-                                tension: 0.1,
-                                pointRadius: 3
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            scales: {
-                                x: {
-                                    display: true,
-                                    title: {
-                                        display: true,
-                                        text: 'Index'
-                                    }
-                                },
-                                y: {
-                                    display: true,
-                                    title: {
-                                        display: true,
-                                        text: 'new_Money'
-                                    }
-                                }
+                    var ctx = document.getElementById('myChart');
+                    if (ctx) {
+                        new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'new_Money',
+                                    data: data,
+                                    fill: false,
+                                    borderColor: 'rgb(75, 192, 192)',
+                                    tension: 0.1
+                                }]
                             }
-                        }
-                    });
+                        });
+                    }
                 },
-                error: function(err, file, inputElem, reason) {
-                    console.error('Fehler beim Laden oder Verarbeiten von history.csv:', err);
+                error: function(err) {
+                    console.error('Error:', err);
                 }
             });
+
+            // Fetch and display the content of './info.txt'
+            fetch('./info.txt')
+                .then(response => response.text())
+                .then(data => {
+                    document.getElementById('infoText').textContent = data;
+                })
+                .catch(error => console.error('Error:', error));
         });
-        fetch('./info.txt')
-  .then(response => response.text())
-  .then(data => {
-    // Select the div and set its text content to the loaded data
-    document.getElementById('infoText').textContent = data;
-  })
-  .catch(error => console.error('Error:', error));
     </script>
 </body>
 </html>
