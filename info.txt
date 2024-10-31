@@ -1,8 +1,7 @@
-Trade: Close BBC Positions
+Trade Alert!: Close "BBC" Trades
 
-short_Postions = True
-Total_Trades = 132
-Trades = 01.01.2021 - 29.10.2024
+short_Positions = Allowed
+total Trades =
+Trading Frame = 01.01.2021 - 29.10.2024
 
-
-Contact Us: inbox@charlies-kummerkasten.xyz
+Contact us under inbox@charlies-kummerkasten.xyz
