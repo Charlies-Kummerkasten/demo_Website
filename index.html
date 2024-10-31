@@ -76,6 +76,11 @@
         <div id="chartContainer">
             <canvas id="myChart"></canvas>
         </div>
+            <div id="chartContainer">
+  <canvas id="myChart"></canvas>
+</div>
+<!-- New div for displaying the text -->
+<div id="infoText"></div>
     </main>
     <footer>
         &copy; 2024 Alle Rechte vorbehalten.
@@ -175,6 +180,13 @@
                 }
             });
         });
+        fetch('./info.txt')
+  .then(response => response.text())
+  .then(data => {
+    // Select the div and set its text content to the loaded data
+    document.getElementById('infoText').textContent = data;
+  })
+  .catch(error => console.error('Error:', error));
     </script>
 </body>
 </html>
