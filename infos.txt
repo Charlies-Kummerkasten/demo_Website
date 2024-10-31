@@ -1,0 +1,3 @@
+short_Postions = True
+Total_Trades = 132
+Trades = 01.01.2021 - 29.10.2024
